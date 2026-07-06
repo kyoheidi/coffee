@@ -1,6 +1,8 @@
 import { supabase } from '@/lib/supabase';
 import BrewClient from './BrewClient';
 
+const sampleSlugs = ['sample', 'harmony', 'noir'] as const;
+
 export const dynamicParams = false;
 
 // ビルド時に、どのslugのページを作るかをここで教える
@@ -10,7 +12,7 @@ export async function generateStaticParams() {
   );
 
   if (!hasSupabaseConfig) {
-    return [{ slug: 'sample' }];
+    return sampleSlugs.map((slug) => ({ slug }));
   }
 
   try {
@@ -18,10 +20,10 @@ export async function generateStaticParams() {
     const slugs = (data as Array<{ slug?: string }> | null | undefined)
       ?.map((p) => p.slug)
       .filter((slug): slug is string => Boolean(slug)) ?? [];
-    return slugs.length > 0 ? slugs.map((slug) => ({ slug })) : [{ slug: 'sample' }];
+    return slugs.length > 0 ? slugs.map((slug) => ({ slug })) : sampleSlugs.map((slug) => ({ slug }));
   } catch (error) {
     console.warn('Failed to generate static params for brew page:', error);
-    return [{ slug: 'sample' }];
+    return sampleSlugs.map((slug) => ({ slug }));
   }
 }
 
