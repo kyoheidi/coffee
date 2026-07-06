@@ -10,7 +10,9 @@ export default function MyPage() {
     supabase
       .from('user_logs')
       .select('*')
-      .then(({ data }) => setLogs(data ?? []));
+      .then(({ data }: { data: Array<{ id: string; comment: string; rating: number }> | null }) =>
+        setLogs(data ?? [])
+      );
   }, []);
 
   return (

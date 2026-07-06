@@ -1,10 +1,28 @@
 // apps/web/app/products/[slug]/page.tsx
 import { supabase } from '@/lib/supabase';
 
+export const dynamicParams = false;
+
 // ビルド時に全商品分のページを生成する
 export async function generateStaticParams() {
-  const { data } = await supabase.from('products').select('slug');
-  return data?.map((p) => ({ slug: p.slug })) ?? [];
+  const hasSupabaseConfig = Boolean(
+    process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  );
+
+  if (!hasSupabaseConfig) {
+    return [{ slug: 'sample' }];
+  }
+
+  try {
+    const { data } = await supabase.from('products').select('slug');
+    const slugs = (data as Array<{ slug?: string }> | null | undefined)
+      ?.map((p) => p.slug)
+      .filter((slug): slug is string => Boolean(slug)) ?? [];
+    return slugs.length > 0 ? slugs.map((slug) => ({ slug })) : [{ slug: 'sample' }];
+  } catch (error) {
+    console.warn('Failed to generate static params for product page:', error);
+    return [{ slug: 'sample' }];
+  }
 }
 
 export default async function ProductPage({ params }: { params: { slug: string } }) {
