@@ -1,11 +1,12 @@
-// apps/web/app/brew/[slug]/page.tsx
-'use client';
+import { supabase } from '@/lib/supabase';
+import BrewClient from './BrewClient';
+
+// ビルド時に、どのslugのページを作るかをここで教える
+export async function generateStaticParams() {
+  const { data } = await supabase.from('products').select('slug');
+  return data?.map((p) => ({ slug: p.slug })) ?? [];
+}
 
 export default function BrewPage({ params }: { params: { slug: string } }) {
-  // ここでステップごとのタイマー・アニメーションを実装していく
-  return (
-    <main>
-      <h1>抽出ガイド: {params.slug}</h1>
-    </main>
-  );
+  return <BrewClient slug={params.slug} />;
 }
